@@ -17,7 +17,7 @@ class Aplicacion : Application() {
     override fun onCreate() {
         super.onCreate()
         listaLibros = ejemploLibros()
-        adaptador = AdaptadorLibrosFiltro(this, listaLibros)
+        adaptador = AdaptadorLibrosFiltro(this, listaLibros!!.toMutableList())
         colaPeticiones = Volley.newRequestQueue(this)
         lectorImagenes = ImageLoader(colaPeticiones,
                 object : ImageLoader.ImageCache {

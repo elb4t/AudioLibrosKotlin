@@ -46,7 +46,7 @@ class AdaptadorLibrosFiltro(contexto: Context,
                     && libro.genero.startsWith(genero)
                     && (!novedad || novedad && libro.novedad)
                     && (!leido || leido && libro.leido)) {
-                listaLibros.add(libro)
+                (listaLibros as Vector<Libro>).add(libro)
                 indiceFiltro!!.add(i)
             }
         }
