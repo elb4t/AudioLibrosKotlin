@@ -12,22 +12,17 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.MediaController
 import android.widget.TextView
-
-import com.android.volley.toolbox.NetworkImageView
 import com.example.audiolibros.Aplicacion
-import com.example.audiolibros.Libro
 import com.example.audiolibros.MainActivity
 import com.example.audiolibros.R
-
+import com.squareup.picasso.Picasso
 import java.io.IOException
-
-import com.example.audiolibros.Aplicacion.Companion.lectorImagenes
 
 class DetalleFragment : Fragment(), View.OnTouchListener, MediaPlayer.OnPreparedListener, MediaController.MediaPlayerControl {
     internal var mediaPlayer: MediaPlayer? = null
     internal lateinit var mediaController: MediaController
 
-    override fun onCreateView(inflador: LayoutInflater, contenedor: ViewGroup?, savedInstanceState: Bundle): View? {
+    override fun onCreateView(inflador: LayoutInflater, contenedor: ViewGroup?, savedInstanceState: Bundle?): View? {
         val vista = inflador.inflate(R.layout.fragment_detalle,
                 contenedor, false)
         val args = arguments
@@ -41,34 +36,36 @@ class DetalleFragment : Fragment(), View.OnTouchListener, MediaPlayer.OnPrepared
     }
 
     override fun onResume() {
-        val detalleFragment = fragmentManager.findFragmentById(R.id.detalle_fragment) as DetalleFragment
+        val detalleFragment = fragmentManager.findFragmentById(R.id.detalle_fragment) as? DetalleFragment
         if (detalleFragment == null) {
             (activity as MainActivity).mostrarElementos(false)
         }
         super.onResume()
     }
 
-    private fun ponInfoLibro(id: Int, vista: View?) {
+    private fun ponInfoLibro(id: Int, vista: View) {
         val (titulo, autor, urlImagen, urlAudio) = (activity.application as Aplicacion)
                 .listaLibros!![id]
-        (vista!!.findViewById<View>(R.id.titulo) as TextView).text = titulo
+        (vista.findViewById<View>(R.id.titulo) as TextView).text = titulo
         (vista.findViewById<View>(R.id.autor) as TextView).text = autor
         //((ImageView) vista.findViewById(R.id.portada)).setImageResource(libro.recursoImagen);
         val aplicacion = activity.application as Aplicacion
-        (vista.findViewById<View>(R.id.portada) as NetworkImageView).setImageUrl(
-                urlImagen, lectorImagenes)
+        Picasso.with(aplicacion.applicationContext)
+                .load(urlImagen)
+                .error(R.drawable.books)
+                .into(vista.findViewById<View>(R.id.portada) as ImageView)
 
         vista.setOnTouchListener(this)
         if (mediaPlayer != null) {
-            mediaPlayer!!.release()
+            mediaPlayer?.release()
         }
         mediaPlayer = MediaPlayer()
-        mediaPlayer!!.setOnPreparedListener(this)
+        mediaPlayer?.setOnPreparedListener(this)
         mediaController = MediaController(activity)
         val audio = Uri.parse(urlAudio)
         try {
-            mediaPlayer!!.setDataSource(activity, audio)
-            mediaPlayer!!.prepareAsync()
+            mediaPlayer?.setDataSource(activity, audio)
+            mediaPlayer?.prepareAsync()
         } catch (e: IOException) {
             Log.e("Audiolibros", "ERROR: No se puede reproducir $audio", e)
         }
@@ -98,10 +95,10 @@ class DetalleFragment : Fragment(), View.OnTouchListener, MediaPlayer.OnPrepared
     override fun onStop() {
         mediaController.hide()
         try {
-            mediaPlayer!!.stop()
-            mediaPlayer!!.release()
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
         } catch (e: Exception) {
-            Log.d("Audiolibros", "Error en mediaPlayer.stop()")
+            Log.d("Audiolibros", "Error en mediaPlayer?.stop()")
         }
 
         super.onStop()
@@ -141,15 +138,15 @@ class DetalleFragment : Fragment(), View.OnTouchListener, MediaPlayer.OnPrepared
     }
 
     override fun pause() {
-        mediaPlayer!!.pause()
+        mediaPlayer?.pause()
     }
 
     override fun seekTo(pos: Int) {
-        mediaPlayer!!.seekTo(pos)
+        mediaPlayer?.seekTo(pos)
     }
 
     override fun start() {
-        mediaPlayer!!.start()
+        mediaPlayer?.start()
     }
 
     override fun getAudioSessionId(): Int {

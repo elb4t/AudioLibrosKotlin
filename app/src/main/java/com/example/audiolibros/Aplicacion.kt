@@ -9,7 +9,7 @@ import com.android.volley.toolbox.Volley
 
 class Aplicacion : Application() {
 
-    var listaLibros: List<Libro>? = null
+    var listaLibros: MutableList<Libro>? = null
         private set
     var adaptador: AdaptadorLibrosFiltro? = null
         private set

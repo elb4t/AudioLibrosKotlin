@@ -1,7 +1,7 @@
 package com.example.audiolibros
 
 import android.content.Context
-import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.support.v7.graphics.Palette
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -9,33 +9,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.squareup.picasso.Callback
+import com.squareup.picasso.Picasso
 
-import com.android.volley.VolleyError
-import com.android.volley.toolbox.ImageLoader
-import com.example.audiolibros.Aplicacion.Companion.lectorImagenes
-import java.util.Vector
 
 open class AdaptadorLibros(private val contexto: Context, protected var listaLibros: List<Libro> //Vector con libros a visualizar
 ) : RecyclerView.Adapter<AdaptadorLibros.ViewHolder>() {
-    private val inflador: LayoutInflater      //Crea Layouts a partir del XML
-    private var onClickListener: View.OnClickListener? = null
-    private var onLongClickListener: View.OnLongClickListener? = null
-
-    init {
-        inflador = contexto
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-    }
+    private val inflador: LayoutInflater = contexto
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater      //Crea Layouts a partir del XML
+    private lateinit var onClickListener: View.OnClickListener
+    private lateinit var onLongClickListener: View.OnLongClickListener
 
     //Creamos nuestro ViewHolder, con los tipos de elementos a modificar
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var portada: ImageView
-        var titulo: TextView
-
-        init {
-            portada = itemView.findViewById<View>(R.id.portada) as ImageView
-            //portada.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            titulo = itemView.findViewById<View>(R.id.titulo) as TextView
-        }
+        val portada: ImageView = itemView.findViewById<View>(R.id.portada) as ImageView
+        val titulo: TextView = itemView.findViewById<View>(R.id.titulo) as TextView
     }
 
     // Creamos el ViewHolder con las vista de un elemento sin personalizar
@@ -52,29 +40,20 @@ open class AdaptadorLibros(private val contexto: Context, protected var listaLib
         val (titulo, _, urlImagen) = listaLibros[posicion]
         //holder.portada.setImageResource(libro.recursoImagen);
         holder.titulo.text = titulo
-        lectorImagenes?.get(urlImagen,
-                object : ImageLoader.ImageListener {
-                    override fun onResponse(response: ImageLoader.ImageContainer, isImmediate: Boolean) {
-                        val bitmap = response.bitmap
-                        if (bitmap != null) {
+        Picasso.with(contexto)
+                .load(urlImagen)
+                .error(R.drawable.books)
+                .into(holder.portada, object: Callback {
+                    override fun onSuccess() {
+                        //Extraemos el color principal de un bitmap
+                        val palette = Palette.from((holder.portada.drawable as BitmapDrawable).bitmap).generate()
+                        holder.itemView.setBackgroundColor(palette.getLightMutedColor(0))
+                        holder.titulo.setBackgroundColor(palette.getLightVibrantColor(0))
 
-                            holder.portada.setImageBitmap(bitmap)
-
-                            //Extraemos el color principal de un bitmap
-                            val palette = Palette.from(bitmap).generate()
-                            holder.itemView.setBackgroundColor(palette.getLightMutedColor(0))
-                            holder.titulo.setBackgroundColor(palette.getLightVibrantColor(0))
-
-                            holder.portada.invalidate()
-                        }
-
+                        holder.portada.invalidate()
                     }
-
-                    override fun onErrorResponse(error: VolleyError) {
-                        holder.portada.setImageResource(R.drawable.books)
-                    }
+                    override fun onError() {}
                 })
-
     }
 
     // Indicamos el número de elementos de la lista
